@@ -1,0 +1,13 @@
+{
+  "pin": 15,
+  "store_location": "snapshots/",
+  "email":
+  {
+    "email": "sender@email.com",
+    "host": "smtp.gmail.com",
+    "port": "587",
+    "receivers":  ["receiver1@email.com", "receiver2@email.com"],
+    "ccs": "",
+    "subject": "PIR Motion detector"
+  }
+}
