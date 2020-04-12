@@ -50,14 +50,15 @@ def main(email, email_photo):
     pin = settings['pin']
     GPIO.setup(pin, GPIO.IN)
 
-    logger.debug("You have 10 secs to evacuate the room")
-    time.sleep(10)  # give 10 secs to yourself to leave the room.
-    logger.debug('Motion detection is on.')
-
     if email:
         password = request_password()
         authenticate_email(email_settings['email'], password,
                            email_settings['host'], email_settings['port'])
+        email_settings['password'] = password
+
+    logger.debug("You have 10 secs to evacuate the room")
+    time.sleep(10)  # give 10 secs to yourself to leave the room.
+    logger.debug('Motion detection is on.')
 
     try:
         while True:
@@ -80,8 +81,8 @@ def main(email, email_photo):
                     try:
                         logger.info('Sending email')
                         img_flnm = img_flnm if email_photo else None
-                        send_email(email_settings,
-                                   text=msg, attached_img=img_flnm)
+                        send_email(email_settings, text=msg,
+                                   attached_img=img_flnm)
                         logger.info('Email sent')
                     except Exception as e:
                         msg = 'An error occured while sending email: %s' % e
@@ -106,11 +107,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--email', type=str, default='yes',
                         choices=['yes', 'y', 'no', 'n'],
-                        help='Whether to send email for warning')
+                        help=('Whether to send email for warning. '
+                              'If no, it over-writes the `--email-photo` arg'))
     parser.add_argument('-p', '--email-photo', type=str, default='yes',
                         choices=['yes', 'y', 'no', 'n'],
-                        help=('whether to include photo in the email. '
-                              'If yes, overwrites the `--email` arg'))
+                        help='whether to include photo in the email.')
     args = parser.parse_args()
 
     # convert input to bool
@@ -118,6 +119,6 @@ if __name__ == "__main__":
     email_photo = True if args.email_photo in ['yes', 'y'] else False
 
     # fix for inconcistency
-    email = True if email_photo else email
+    email_photo = False if email is False else email_photo
 
     main(email, email_photo)
